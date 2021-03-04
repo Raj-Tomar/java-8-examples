@@ -1,0 +1,1396 @@
+Java 8 Features with Examples:
+======================================================================================================================================================
+References:
+	https://www.journaldev.com/2389/java-8-features-with-examples
+	https://howtodoinjava.com/java-8-tutorial/
+	https://www.youtube.com/watch?v=Tm2BpKlv1rU&list=PLd3UqWTnYXOlrKZWFTbgguqNRA_uVyeBl
+======================================================================================================================================================
+Features:
+	1. Lambda Expressions
+	2. Functional Interface
+	3. Default Method and static Method
+	4. Pre-defined Functional Interface
+		Predicate
+		Function
+		Consumer
+		Supplier
+		etc...
+	5. Double Colon Operator (::)
+		Method reference purpose
+		Constructor Purpose
+	6. Streams
+	7. Date/Time API
+	8. Optional Class
+	9. Nashron JavaScript Engine
+	etc...
+
+======================================================================================================================================================
+1. Lambda Expression
+
+	The main objective of Lambda Expression:
+		To bring functional programming into Java.
+		We can handle a function just like an Object.
+		We can write concise code using Lambda.
+	
+	What is Lambda Expression?
+		It is an anonymous function 
+			Without name.
+			Without return type.
+			without modifier.
+	
+	How to write Lambda Expression?
+	Example 1:
+		public void m1() {
+			System.out.println("Hello");
+		}
+		Convert into Lambda Expression:
+		Remove method name m1
+		Remove return type
+		Remove modified
+		Add Special symbol (->) to identify lambda
+		() -> { System.out.println("Hello"); }
+		{} body of lambda expression and it contains only 1 line
+			then {} are optional
+		() -> System.out.println("Hello");
+	Example 2:
+		public void m1(int a, int b) {
+			System.out.println(a+b);
+		}
+		Convert into Lambda Expression:
+		(a,b)-> System.out.println(a+b);
+		Compiler can guess the type automatically
+		We no need to specify the type explicitly.
+	Example 3:
+		public int square(int n) {
+			return n*n;
+		}
+		Convert into Lambda Expression:
+		(n) -> return n*n;
+		Compiler can guess the return value, so no need to add return keyword.
+		(n) -> n*n;
+		if there is only 1 Parameter then parentheses is optional.
+		n -> n*n;
+		
+		Rules:
+			Without Curlty braces we can't use return keyword.
+			Within curly braces if we want to return some value, we must use return keyword.
+			
+	Example 4:
+		find the lenght of String
+		public int m1(String s) {
+			return s.length();
+		}
+		Convert into Lambda Expression:
+		s -> s.length();
+	
+	
+	How to call/invoke Lambda Expression:
+		We must go for Functional Interface(FI).
+------------------------------------------------------------------------------------------------------------------------------------------------------
+2.	Functional Interface
+		
+		What is Functional Interface?
+			Interface which contains exactly Single Abstract Method (SAM), such interfaces called Functional Interfaces.
+			Examples: (All below interfaces contains single abstract method)
+				Runnable 		=> run()
+				Comparable		=> compareTo()
+				CompareTo		=> compare()
+				ActionListner	=> actionPerformed()
+				Callable		=> call()
+			But:
+				Functional Interface can have any number of default method and static method but abstract method must be 1 only.
+				Example:
+					interface A { 
+						public void m1();
+						default void m2() {}
+						public static void m3() {}
+					} // Valid Functional Interface, becuase there is only 1 abstract method m1()
+			
+			There is annotation itroduced in Java 8: @FunctionalInterface
+			We are using @FunctionalInterface to specify explicitly the interface is Functional Interface.
+			If we are going to do any mistake to compiler will inform us.
+			@FunctionalInterface is not mandatory.
+			
+			@FunctionalInterface
+			interface A { 
+						public void m1();
+						default void m2() {}
+						public static void m2() {}
+					} // Valid Functional Interface, becuase there is only 1 abstract method m1()
+		
+		What is the User of Functional Interface?
+			To invoke/call lambda expression functional interfaces must be required.
+		
+		
+		Functional Interface With respect to Inheritance:
+			@FunctionalInterface
+			interface B extends A { 
+			} // Valid Functional Interface, becuase Automatically Parent method is available
+			
+			@FunctionalInterface
+			interface B extends A { 
+				public void m1();
+			} // Valid Functional Interface, becuase overriding m1() method
+			
+			@FunctionalInterface
+			interface B extends A { 
+				public void m2();
+			} // InValid Functional Interface, becuase in child interface there are 2 abstract methods.
+			
+		
+			interface B extends A { 
+				public void m2();
+			} // Valid Interface, becuase B is normal interface it can contains any number of abstract methods.
+			
+		Lambda Expression with Functional Interfaces:
+			
+			interface MyInterface {
+				public void m1();
+			}
+			
+			class Demo implements MyInterface {
+				public void m1() {
+					Sysout("Hello m1()");
+				}
+			}
+			
+			class Test {
+				p s v m(String[] s) {
+					Demo d = new Demo();
+					d.m1();
+					
+					MyInterface m = new Demo();
+					m.m1();
+					
+					//We can implement MyInterface with Lambda expression also.
+					//We are not required to write Demo class.
+					//We can remove Demo class
+					MyInterface m1 = () -> Sysout("Hello by Lambda Expression");
+					m1.m1();
+				}
+			}
+------------------------------------------------------------------------------------------------------------------------------------------------------
+	Lambda Expressions Multithreading & Collections
+
+		Note :	java.util.function contains several pre defined methods to meet our general requirements.
+				Lambda expression does not generate seperate .class file. 
+				At the time of compilation it will be converted into private method.
+				
+	
+	Lambda Expression for Multithreading
+	
+		class MyRunnable implements Runnable {
+			public void run() {
+				for(int i = 0; i < 10; i++) {
+					System.out.println("Child Thread");
+				}
+			}
+		}
+		
+		class Test {
+			p s v m (String[] args) {
+				MyRunnable m = new MyRunnable();
+				Thread t = new Thread(m);
+				t.start();
+				for(int i = 0; i < 10; i++) {
+					System.out.println("Main Thread");
+				}
+				// There are 2 Threads - main thread and child thread.
+				// Both thread will execute simultaneously.
+				// We will be getting mixed output.
+				
+				// Runnable interface is Functional Interface.
+				// We can remove MyRunnable class and go for Lambda Expression.
+				Runnable r = () -> {
+						for(int i = 0; i < 10; i++) {
+							System.out.println("Child Thread 1");
+						}
+				};
+				Thread t = new Thread(r);
+				t.start();
+				for(int i = 0; i < 10; i++) {
+					System.out.println("Main Thread 1");
+				}
+			}
+		}
+		
+	Lambda Expression for Collection
+		
+		class MyComparator implements Comparator<Integer> {
+			public int compare(Integer i1, Integer i2) {
+				return (i1 < i2) ? -1 : (i1 > i2) ? 1 : 0;
+			}
+		}
+		Comparator
+			int compare(Object obj1, Object obj2)
+				returns +ve iff obj1 has to come before obj2
+				returns -ve iff obj1 has to come before obj2
+				returns 0 iff obj1 and obj2 are equal
+	
+		class Test {
+			p s v m (String[] args) {
+				ArrayList<Integer> list = new ArrayList<>();
+				list.add(20);
+				list.add(10);
+				list.add(25);
+				list.add(5);
+				list.add(0);
+				list.add(30);
+				list.add(15);
+				System.out.println(list); // Output will print in same order within [].
+				Collections.sort(list, new MyComparator());
+				System.out.println(list); // Output will be sorted in ascending order.
+				
+				// Convert to Lamda Expression
+				// Remove MyComparator class
+				Comparator<Integer> c = (i1, i2) -> (i1 < i2) ? -1 : (i1 > i2) ? 1 : 0;
+				Collections.sort(list, c);
+				System.out.println(list);
+				
+				// Print 1 by 1 element
+				list.stream().forEach(System.out::println);
+				
+				// Even number from list
+				List<Integer> l = list.stream().filter(i -> i%2 == 0).collect(Collectors.toList());
+				System.out.println(l);
+			}
+		}
+		
+		Sort Employee based Employee Number
+	
+		class Employee {
+			private int empNo;
+			private String name;
+			
+			Employee(int empNo, String name) {
+				this.empNo = empNo;
+				this.name = name;
+			}
+			
+			public String toString() {
+				return empNo + " " + name;
+			}
+		}
+		
+		class Test {
+			p s v m (String[] args) {
+				ArryaList<Employee> empList = new ArrayList<>();
+				empList.add(new Employee(11, "A");
+				empList.add(new Employee(22, "B");
+				empList.add(new Employee(33, "C");
+				empList.add(new Employee(44, "D");
+				empList.add(new Employee(55, "E");
+				System.out.println(empList);
+				
+				// Sorting according to empNo in ascending order.
+				Comparator<Integer> c = (e1, e2) -> (e1 < e2) ? -1 : (e1 > e2) ? 1 : 0;
+				Collections.sort(empList, c);
+				System.out.println(empList);
+				
+				// Sort based on alphbetical order of Employee Names
+				c = (e1, e2) -> e1.name().compareTo(e2.name);
+				Collections.sort(empList, c);
+				System.out.println(empList);
+			}
+		}
+		
+------------------------------------------------------------------------------------------------------------------------------------------------------
+	Anonymous Inner Class vs Lambda Expressions
+			
+		Thread t = new Thread();
+		
+		Thread t = new Thread() {
+			...
+		}; 
+		We are writing a class that extends Thread class means We are creating chilc class for Thread
+		for that Child class we are creating object.
+		No name for chilc class, this class called Anonymous inner class
+		
+		Runnable r = new Runnable() {
+			// Child class for Runnable
+		};
+		
+		Note:
+			Anonymous inner class can extends a class or can implements an interface.
+			
+		class Test {
+			p s v m (String[] args) {
+				Runnable r = new Runnable() {
+					Write Implementation for Runnable
+					public void run() {
+						for (int i = 0; i < 10; i++) {
+							System.out.println("Child Thread");
+						}
+					}
+					Instead of implementing separate class, we can implement where ever functionality is required.
+				};
+				Here we are not creating object for Runnable interface.
+				We are creating object for its Implementation class.
+				
+				Thread t = new Thread(r);
+				t.start();
+				for (int i = 0; i < 10; i++) {
+					System.out.println("Main Thread");
+				}
+				
+				Anonymous inner class is implementing Runnable interface and it is Functional Interface
+				So we can replace it with Lambda Expression.
+				Below Converting to Lambda Expressions:
+				
+				Runnable r = () -> {
+					for (int i = 0; i < 10; i++) {
+						System.out.println("Child Thread");
+					}
+				};
+				
+			}
+		}
+		
+		interface A {
+			public void m1();
+			public void m2();
+		}
+		We can not go for Lambda expression for above interface becuase it has 2 abstract methods.
+		But we can go for Anonymous inner class.
+		
+		A a = new A() {
+			public void m1(){}
+			public void m2(){}
+		};
+		
+		Anonymous inner class is NOT EQUAL to Lambda Expressions.
+		If Anonymous inner class implements an interface that contains only single abstract method 
+		then only we can replace that Anonymous inner class with Lambda Expressions.
+		
+		Notes:
+			Anonymous inner class can extends a normal class.
+			Anonymous inner class can extends an abstract class.
+			Anonymous inner class can implement an interface which contains any number of abstract methods.
+		
+			Lambda Expression can implement an interface which contains a Single Abstract method.
+			
+			Anonymous inner class != Lambda Expression
+			Anonymous inner class > Lambda Expression
+------------------------------------------------------------------------------------------------------------------------------------------------------
+
+3. Default Method and static Method
+
+	Default method() & Static method() inside Interface
+	
+		Methods:
+			Java 1.7V:
+				Every method present inside interface is always: public and abstract.
+			
+			Java 8V:
+				static methods and defualt methods are allowed.
+				
+			Java 9V:
+				private method allowed
+		
+		Varialbes: No inhancement in newer versions in java.
+		
+	Default Method | Virtual Extention Method | Defender Method:
+	
+		interface I {
+			public void m1();
+			public void m2();
+		}
+		
+		class Test1 implements I {
+			public void m1(){}
+			public void m2(){}
+		}
+		
+		class Test2 implements I {
+			public void m1(){}
+			public void m2(){}
+		}
+		
+		class Test100 implements I {
+			public void m1(){}
+			public void m2(){}
+		}
+		
+		
+		If implementation classes already defined then we are not allowed to add any new method in interface.
+		If we are going to add any new method in interface I then all the implementations class will be effected.
+		
+		Without effecting implementation classes is possible to add new methods to the interface?
+			This concept is nothing but Default Methods.
+		
+		interface I {
+			public void m1();
+			public void m2();
+			
+			default void m3() {
+				System.out.println("Default Method");
+			}
+		}
+		
+		Default Method is already have implementation, so implementation classes are not required to implement m3() method.
+		
+		Without effecting implementation classes if want to add new method to the interface then we should go for Default Method concept.
+		
+		How to use Default Methods:
+			
+			interface MyInterface {
+				default void m3() {
+					System.out.println("Default Method");
+				}
+			}
+			
+			class Test implements MyInterface {
+				
+				We can override default method 
+				We have to use public keyword while overriding default method.
+				We can not use default method inside class. only we can use inside interface.
+				public void m3() {
+					System.out.println("Overriding version of Default Method");
+				}
+				
+				p s v m (String[] args) {
+					Test t = new Test();
+					t.m3();
+				}
+			}
+			
+			interface MyInterface {
+				default void m3() {
+					System.out.println("Default Method");
+				}
+				
+				default int hashCode() {
+					return 10;
+				} // Invalid method
+			}
+			
+			class Test implements MyInterface {
+				
+			}	
+			
+			Test is already child of Object class and having hashCode() method.
+			Its not required to make available hashCode() method using default method.
+			Object class methods we cant implement as default methods, 
+			becuase Object class methods are by default available to every implementation class.
+			
+			
+		Multiple Inheritance with default methods
+			
+			If 2 interfaces contains same default methods then we have to follow below approach.
+			interface MyInterface1 {
+				default void m1() {
+					System.out.println("MyInterface1");
+				}
+			}
+			
+			interface MyInterface2 {
+				default void m1() {
+					System.out.println("MyInterface2");
+				}
+			}
+			
+			class Test implements MyInterface1, MyInterface2 {
+				
+			} // Invalid
+			
+			To overcome above problem, override method m1()
+			class Test implements MyInterface1, MyInterface2 {
+				public void m1() {
+					System.out.println("Overriden Method");
+					// To call MyInterface1/MyInterface2 m1() method
+					// MyInterface1.super.m1();
+					MyInterface2.super.m1();
+				}
+				
+				p s v m (String[] args) {
+					new Test().m1();
+				}
+			}
+		
+		Static methods:
+			
+			From Java 8 interface can contains static methods, 
+			becuase static method no where related to Object.
+			Why we have to go for very costly object/class terminology.
+		
+		How to Declare static method:
+		
+			interface MyInterface {
+				public static void m1() {
+					System.out.println("Interface Static method");
+				}
+			}
+		
+		How to call static methods:
+		
+			class Test implements MyInterface {
+				
+				p s v m (String[] args) {
+					
+					MyInterface.m1(); // 1
+					m1(); // 2
+					Test.m1(); // 3
+					new Test().m1(); // 4
+					
+					Interface static methods by default not available to implementation classes.
+					Interface static methods can be called by using Interface name only.
+					Thats why approach 2,3,4 are Invalid, ONLY approach 1 is VALID.
+				}
+			}
+			
+			Is is possible to declare main() inside interface?
+				Yes, from Java 8 onwards we can declare main() method inside interface.
+				and we can execute directly interface.
+			interface MyInterface {
+				public static void main(String[] args) {
+					System.out.println("Interface main method");
+				}
+			} // Valid exampel, We can directly run this interface
+				
+			Why static method concept came inside interface?
+				I want to define general utility methods like add(), substract() etc...
+				If method are static and nowhere related to object then no need to define in class.
+				We can go for interface static methods.
+			
+			
+------------------------------------------------------------------------------------------------------------------------------------------------------			
+	
+4.	Pre-defined Functional Interface: Predicate (Package: java.util.function)
+
+		Predicate
+		Function
+		Consumer
+		Supplier
+		
+		Two Argument Predefined Functional Interfaces:
+			BiPredicate
+			BiFunction
+			BiConsumer
+			etc...
+		
+		Premitive Functioal Interface
+			IntPredicate
+			IntFunction
+			IntConsumer
+			etc...
+			
+		Predicate(I): (Predicate is Functional Interface)
+			
+			For consitional check, we can use Predicate.
+			contains only one abstract method
+				public abstract boolean test(T t);
+			
+				interface Predicate<T> {
+					public abstract boolean test(T t);
+				}
+				
+			Examples:
+				
+				Check number is Even or Odd:
+				public boolean test(Integer i) {
+					return i%2 == 0;
+				}
+				Convert to Lambda Expression:
+				i -> i%2 == 0;
+				
+				Using Predicate
+				class Test {
+					p s v m (String[] args) {
+						Predicate<Integer> p1 = i -> i%2 == 0;
+						System.out.println(p1.test(10));	// true
+						System.out.println(p1.test(15));	// false
+						
+						// String length > 5
+						String[] str = {"Aasdf", "Basdfasdf", "Casder", "Dzxcvert", "Easdvzxcv"};
+						Predicate<String> p3 = s -> s.length() > 5;
+						// Even length Strings
+						Predicate<String> p4 = s -> s.length() % 2 == 0;
+						for (String s : str) {
+							if(p3.test(s)) {
+								System.out.println(s);
+							}
+							if(p4.test(s1)) {
+								System.out.println(s);
+							}
+						}
+						
+					}
+				}
+				
+			How Many Paraemeter we can in Predicate ? 
+			
+				Predicate<String> p
+					Predicate can take only single argument.
+					here input type is String (This will vary based on uses).
+					output is alyways boolean so need to pass in Predicate.
+				
+				class Employee {
+					String name;
+					double salary;
+					Employee(String name, double salary) {
+						this.name = name;
+						this.salary = salary;
+					}
+				}
+				
+				class Test {
+					p s v m (String[] args) {
+						List<Employee> empList = new ArrayList<>();
+						List<Employee> empList = new ArrayList<>();
+						empList.add(new Employee("A", 1000));
+						empList.add(new Employee("B", 2000));
+						empList.add(new Employee("C", 3000));
+						empList.add(new Employee("D", 4000));
+						empList.add(new Employee("E", 5000));
+						empList.add(new Employee("F", 6000));
+						
+						// Check employee salary > 3000
+						Predicate<Employee> p = e -> e.salary > 3000;
+						for(Employee emp : empList) {
+							if(p.test(emp)) {
+								System.out.println(emp.name + " : " + emp.salary);
+							}
+						}
+						
+					}
+				}
+			
+			Predicate Joining:
+				
+				We can join multiple Predicate to check complex conditions.
+			
+				p1 = to check number is even or not
+				p2 = to check whether number > 10 or not
+				
+				p1.and(p2).test(23);
+				p1.or(p2).test(23);
+				p1.negate().test(23);		// Opposite of p1
+				
+				int[] x = {0, 5, 10, 15, 20, 25, 30, 35};
+				
+				Predicate<Integer> p1 = i -> i % 2 == 0;
+				Predicate<Integer> p2 = i -> i > 10;
+				// and(), or(), negate()
+				for(int x1 : x) {
+					if(p1.and(p2).test(x1)) {
+						System.out.println("Even and > 10 : " + x1);	// 20, 30
+					}
+					
+					if(p1.or(p2).test(x1)) {
+						System.out.println("Even or > 10 : " + x1);	// 0, 10, 15, 20, 25, 30, 35
+					}
+					
+					if(p1.negate().test(x1)) {
+						System.out.println("Not Even : " + x1);	// 0, 5, 15, 25, 35
+					}
+				}
+	
+------------------------------------------------------------------------------------------------------------------------------------------------------			
+		
+		Function(I): (Function is Functional Interface)
+			
+			Pass the input and perform some operation and Produce result.
+			Return type can be anything.
+			input => Perform Operation => Output
+			4 => square operation => 16
+			
+			interface Function<T, R> {
+				public R apply(T t);
+			}
+			// T is Type of Input.
+			// R is type Return
+			
+			e.g.
+				i --> i*i;			// input is Integer and return is Integer
+				s --> s.length();	// input is String and return is Integer
+			
+			Examples:
+			
+				class Student {
+					String name;
+					int marks;
+					Student(String name, int marks) {
+						this.name = name;
+						this.marks = marks;
+					}
+				}
+				
+				class Test {
+					p s v m(String[] args) {
+						
+						Function<Integer,Integer> f1 = i -> i * i;
+						System.out.println(f1.apply(4)); // Output is: 16
+						System.out.println(f1.apply(5)); // Output is: 25
+						
+						// Input Type is String and return Type is Integer
+						Function<String,Integer> f2 = s -> s.length();
+						System.out.println(f2.apply("Raj")); // Output is: 3
+						
+						Function<String,String> f3 = s -> s.toUpperCase();
+						System.out.println(f3.apply("Raj"));
+						
+						If marks:
+						>= 80 ==> A [Distinction]
+						>= 60 ==> B [First Class]
+						>= 50 ==> C [Second Class]
+						>= 35 ==> D [Third Class]
+							  ==> E [Failed]
+						
+						Write a Function to Generate Grade.
+						Function<Student, String> f4 = s -> {
+							String grade = "";
+							if(s.marks >= 80) grade = "A [Distinction]";
+							else if(s.marks >= 60) grade = "B [First Class]";
+							else if(s.marks >= 50) grade = "C [Second Class]";
+							else if(s.marks >= 35) grade = "D [Third Class]";
+							else grade = "E [Failed]";
+							return grade;
+						};
+						List<Student> studentList = new ArrayList<>();
+						studentList.add(new Student("A Student", 100));
+						studentList.add(new Student("B Student", 65));
+						studentList.add(new Student("C Student", 55));
+						studentList.add(new Student("D Student", 45));
+						studentList.add(new Student("E Student", 25));
+						for(Student st : studentList) {
+							System.out.println("Name : "+st.name);
+							System.out.println("Marks : "+st.marks);
+							System.out.println("Grade : "+f4.apply(st));
+							System.out.println();
+						}
+						
+						Predicate<Student> p = s -> s.marks > 60;
+						for(Student st : studentList) {
+							if(p.test(st)) {
+								System.out.println("Name : "+st.name);
+								System.out.println("Marks : "+st.marks);
+								System.out.println("Grade : "+f4.apply(st));
+								System.out.println();
+							}
+						}
+					}
+				}
+				
+			Function Chaining:
+				
+				We can use any number functions.
+				f1.andThen(f2).apply(i);
+					First apply f1 function then on the result of f1 function apply f2 function.
+				
+				f1.compose(f2).apply(i);
+					First apply f2 function then f1 function.
+					
+				Function<Integer, Integer> f1 = i -> i * 2;
+				Function<Integer, Integer> f2 = i -> i * i * i;
+				System.out.println(f1.andThen(f2).apply(2));	// Output 64
+				System.out.println(f1.compose(f2).apply(2));	// Output 16
+			
+		
+		Consumer(T):
+		
+			Consumer will take input but never returns any value.
+			Take input => Perform Operation => returns void
+			
+			interface Consumer<T> {
+				public void accept(T t) {
+				}
+			}
+			
+			class Test {
+				p s v m(String[] args){
+					Consumer<String> c1 = str -> System.out.println(str);
+					c.accept("Some String");
+					c.accept("Any Other String");
+					
+					Function<Student, String> f4 = s -> {
+						String grade = "";
+						if(s.marks >= 80) grade = "A [Distinction]";
+						else if(s.marks >= 60) grade = "B [First Class]";
+						else if(s.marks >= 50) grade = "C [Second Class]";
+						else if(s.marks >= 35) grade = "D [Third Class]";
+						else grade = "E [Failed]";
+						return grade;
+					};
+					
+					Consumer<Student> c2 = s -> {
+						System.out.println("Name : "+s.name);
+						System.out.println("Marks : "+s.marks);
+						System.out.println("Grade : "+f4.apply(s));
+						System.out.println();
+					};
+					
+						
+					List<Student> studentList = new ArrayList<>();
+					studentList.add(new Student("A Student", 100));
+					studentList.add(new Student("B Student", 65));
+					studentList.add(new Student("C Student", 55));
+					studentList.add(new Student("D Student", 45));
+					studentList.add(new Student("E Student", 25));
+					for(Student st : studentList) {
+						c2.accept(st);
+					}
+					
+					Predicate<Student> p = s -> s.marks > 60;
+					for(Student st : studentList) {
+						if(p.test(st)) {
+							c2.accept(st);
+						}
+					}
+				}
+			}
+			
+			class Movie {
+				String name;
+				Movie (String name) {
+					this.name = name;
+				}
+			}
+			
+			Consumer Chaining:
+			
+				Consumer<Movie> c1 = m -> System.out.println("Ready to Release");
+				Consumer<Movie> c2 = m -> System.out.println("Release and Very Successful");
+				Consumer<Movie> c3 = m -> System.out.println("Storing into DB");
+				Consumer<Movie> cc = m -> c1.andThen(c2).andThen(c3);
+				
+				Movie m = new Movie("Spider Man");
+				cc.accept(m);
+				// All 3 Consumer will be excecuted.
+				// only andThen() method can be used.
+				
+			
+			
+------------------------------------------------------------------------------------------------------------------------------------------------------					
+			
+		Supplier, BiPredicate, BiFunction & BiConsumer:
+		
+			
+			Just Supply required object and it won't take any Input.
+			It will not take any argument then go for Supplier.
+			
+			interface Supplier<R> {
+				public R get();
+			} // R represents Return Type.
+		
+			
+			class Test {
+				p s v m (String[] args){
+					Supplier<Date> s1 = () -> new Date();
+					System.out.println(s.get());	// Print Current System Date.
+					
+					// Supply Random OTP
+					Supplier<String> s2 = () -> {
+						String otp = "";
+						for(int i = 0; i < 6 ; i++) {
+							otp += (int)(Math.random() * 10);
+						}
+						// random() method generates 0 <= x < 1
+						return otp;
+					};
+					System.out.println(s2.get());
+				}
+			}
+			
+			
+		BiPredicate:
+		
+			Normal Predicate can take only 1 argument and perform some conditional check.
+			But sometimes our programming requirement is, we have to take 2 input argument and perform some consitional check.
+			For this requirement we should go for BiPredicate.
+			BiPredicate is exactly same as Predicate except it will take 2 Input Argument.
+			
+			interface BiPredicate<T1, T2> {
+				public boolean test(T1 t1, T2 t2);
+				// Remaining default methods : and(), or(), negate()
+			}
+		
+			Two Input Arguments:
+			
+				Check the sum of 2 number is even or not.
+				We have to 2 for two argument functional interfaces.
+				e.g.
+					BiPredicate
+				
+				class Test {
+					p s v m(String[] args) {
+						BiPredicate<Integer, Integer> p = (a,b) -> (a+b) % 2 == 0;
+						System.out.println(p.test(10,20));	// Output true
+						System.out.println(p.test(15,20));	// Output false
+					}
+				}
+				
+		BiFunction:
+			
+			It will take 2 arguments and perform required operation, then we have to go for BiFunction.
+			
+			interface BiFunction<T, U, R> {
+				public R apply(T t, U u);
+				// default method andThen()
+			}
+			
+			class Employee {
+				int eno;
+				String name;
+				Employee(int eno, String name) {
+					this.eno = eno;
+					this.name = name;
+				}
+			}
+			// Provide eno and name then get Employee Object.
+			
+			class Test {
+				p s v m(String[] args) {
+					BiFunction<Integer, String, Employee> f = (eno, name) -> new Employee(eno, name); 
+					
+					List<Employee> l = new ArrayList<>();
+					l.add(f.apply(100, "A"));
+					l.add(f.apply(200, "B"));
+					l.add(f.apply(300, "C"));
+					l.add(f.apply(400, "D"));
+					
+					for(Employee e : l) {
+						System.out.println(e.eno + " : " + e.name);
+					}
+				}
+			}
+			
+		BiConsumer:
+		
+			It can take 2 Input Arguments 
+		
+			class Employee {
+				String name;
+				double salary;
+				Employee(String name, double salary) {
+					this.name = name;
+					this.salary = salary;
+				}
+			}
+			
+			class Test {
+				p s v m(String[] args) {
+					
+					BiFunction<String, Double, Employee2> f = (name, salary) -> new Employee(name, salary);
+					
+					List<Employee> l = new ArrayList<>();
+					l.add(f.apply("A", 1000.0));
+					l.add(f.apply("B", 2000.0));
+					l.add(f.apply("C", 3000.0));
+					l.add(f.apply("D", 4000.0));
+					
+					// Increment salary by 500 
+					BiConsumer<Employee, Double> c = (e, d) -> e.salary = e.salary + d; 
+					for (Employee e : l) {
+						c.accept(e, 500.0);
+					}
+					for (Employee e : l) {
+						System.out.println(e.name + " : " + e.salary);
+					}
+				}
+			}
+			
+		Why BiSupplier Functional Interface is not available?
+			Supplier Interface get() method does not take any argument.
+			just it will supply the result. Hence no change of taking 2 input parameters.
+			
+------------------------------------------------------------------------------------------------------------------------------------------------------					
+	
+	Additional Functional Interface:
+	
+		Primitive Version of Functional Interface:
+		
+			int x[] = {0, 5, 10, 15, 20};
+			Predicate<Integer> p = i -> i % 2 == 0;	
+			for (int i : x) {
+				if(p.test(i)) {
+					System.out.println(i);
+				}
+			}
+			Here for every number autoboxing and autounboxing is performed.
+			To avoid this, we should go for Primitive Predicate.
+		
+			Primitive Prediate Types:
+				
+				IntPredicate
+				DoublePredicate
+				LongPredicate
+			
+			Predicate<Integer> ==> IntPredicate
+				example:
+					int x[] = {0, 5, 10, 15, 20};
+					IntPredicate p = i -> i % 2 == 0;
+					// There is not autoboxing will be performed with IntPredicate.
+					for (int i : x) {
+						if(p.test(i)){
+							System.out.println(i);
+						}
+					}
+		
+			Primitive Version of Functions:
+			
+				Function<Integer, Integer> f = i -> i * i;
+				System.out.println(f.apply(4));
+				
+				How Many Converstion will be performed?
+					int --> Integer --> int --> Integer
+					int --> Integer ==> autoboxing
+					Integer --> int ==> autounboxing
+					int --> Integer ==> autoboxing
+					
+				To avoid this autoboxing and autounboxing, we should go for Primitive version of Functions.
+				
+			Primitive Prediate Types:
+			
+				DoubleFunction:
+					Input Type:		double
+					Retrun Type:	anything
+					
+				IntFunction:
+					Input Type:		int
+					Retrun Type:	anything
+					
+				LongFunction:
+					Input Type:		long
+					Retrun Type:	anything
+				--------------------------------------------------------	
+				DoubleToIntFunction		
+					Input Type:		double
+					Retrun Type:	int
+					Method:			applyAsInt(double value)
+				
+				DoubleToLongFunction:
+					Input Type:		double
+					Retrun Type:	long
+					Method:			applyAsLong(double value)
+					
+				IntToDoubleFunction:
+					Input Type:		int
+					Retrun Type:	double
+					Method:			applyAsDouble(int value)
+			
+				IntToLongFunction:
+					Input Type:		int
+					Retrun Type:	long
+					Method:			applyAsLong(int value)
+					
+				LongToIntFunction:
+					Input Type:		long
+					Retrun Type:	int
+					Method:			applyAsInt(long value)
+					
+				LongToDoubleFunction:
+					Input Type:		long
+					Retrun Type:	double
+					Method:			applyAsDouble(long value)
+				--------------------------------------------------------
+				ToIntFunction:
+					Input Type:		anything
+					Retrun Type:	int
+					Method:			applyAsInt(T t)
+					
+				ToLongFunction:
+					Input Type:		anything
+					Retrun Type:	long
+					Method:			applyAsLong(T t)
+					
+				ToDoubleFunction:
+					Input Type:		anything
+					Retrun Type:	Double
+					Method:			applyAsLong(T t)
+					
+				--------------------------------------------------------
+				
+				ToIntBiFunction:
+					Input Type:		2 argument type of anything
+					Retrun Type:	int
+					Method:			applyAsInt(T t, U u)
+				
+				ToLongBiFunction:
+					Input Type:		2 argument type of anything
+					Retrun Type:	long
+					Method:			applyAsLong(T t, U u)
+				
+				ToDoubleBiFunction:
+					Input Type:		2 argument type of anything
+					Retrun Type:	double
+					Method:			applyAsDouble(T t, U u)
+					
+				--------------------------------------------------------
+				
+				Examples:
+					Function<Integer, Integer> f1 = i -> i * i;
+					System.out.println(f1.apply(4));
+					// Convert to Primitive Function
+					IntFunction<Integer> f2 = i -> i * i;
+					System.out.println(f2.apply(4));
+					
+					Function<String, Integer> f3 = s -> s.length();
+					System.out.println(f3.apply("Raj"));
+					// Convert to Primitive Function
+					ToIntFunction<String> f4 = s -> s.length();
+					System.out.println(f4.applyAsInt("Raj"));
+					
+					Function<Integer, Double> f5 = i -> Math.sqrt(i);
+					System.out.println(f5.apply(7));
+					IntToDoubleFunction f6 = i -> Math.sqrt(i);
+					System.out.println(f6.applyAsDouble(7));
+					
+				
+				--------------------------------------------------------
+		
+		
+		Primitive Type of Consumer:
+		
+			IntConsumer:
+				Method: void accept(int value)
+				
+			LongConsumer:
+				Method: void accept(long value)
+			
+			DoubleConsumer:
+				Method: void accept(double value)
+				
+			ObjectDoubleConsumer:
+				Method: void accept(T t, double value)
+				
+			ObjectIntConsumer:
+				Method: void accept(T t, int value)
+			
+			ObjectLongConsumer:
+				Method: void accept(T t, long value)
+				
+		
+		Primitive Type of Supplier:
+		
+			BooleanSupplier:
+				Method: boolean getAsBoolean();
+				
+			IntSupplier:
+				Method: int getAsInt()
+			
+			LongSupplier:
+				Method: int getAsLong()
+				
+			DoubleSupplier:
+				Method: double getAsDouble();
+				
+		
+		UnaryOperator<T>:
+			
+			Input and Output type are same then use UnaryOperation Functional Interface.
+			Its child of Function<T,T>.
+			
+			Primitive Version of UnaryOperator:
+			
+				IntUnaryOperator:
+					Method: public int applyAsInt(int value);
+						
+				LongUnaryOperator:
+					Method: public int applyAsLong(long value);	
+				
+				DoubleUnaryOperator:
+					Method: public int applyAsDouble(double value);	
+			
+			Example:
+				Function<Integer, Integer> f = i -> i * i;
+				Alternate of this Function:
+				// If Input and Output are User defined object the go for below UnaryOperator.
+				UnaryOperator<Integer> f2 = i -> i * i;
+				System.out.println(f2.apply(4));
+				
+				// To Enhance performance of above UnarayOperator, Go for IntUnaryOperator.
+				IntUnaryOperator f3 = i -> i * i;
+				System.out.println(f3.applyAsInt(4));
+				
+			
+			
+		BinaryOperator:
+		
+			If Both inputs and Retrun type are always same, then go for BinaryOperator.
+			It is child of BiFunction<T, T, T>.
+			Method : public T apply(T,T)
+			
+			Primitive Version of BinaryOperator:
+			
+				IntBinaryOperator:
+					Method: public int applyAsInt(int value);
+					
+				LongBinaryOperator:
+					Method: public int applyAsLong(int value);
+				
+				DoubleBinaryOperator:
+					Method: public int applyAsDouble(int value);
+			
+			Example:
+				BiFunction<String, String, String> f10 = (s1, s2) -> s1 + s2;
+				System.out.println(f10.apply("Raj", "Tomar"));
+				// For This we can go for BinaryOperator
+				BinaryOperator<String> b = (s1, s2) -> s1 + s2;
+				System.out.println(b.apply("Raj", "Tomar"));
+				
+				BinaryOperator<Integer> b1 = (i1, i2) -> i1 * i2;
+				System.out.println(b1.apply(10, 20));
+				
+				// We can go for Primitive Binary Operator
+				IntBinaryOperator b2 = (i1, i2) -> i1 * i2;
+				System.out.println(b2.applyAsInt(10, 20));
+
+------------------------------------------------------------------------------------------------------------------------------------------------------								
+	
+	Method and Constructor Reference:
+	
+	
+	Method Reference:
+		
+		Alternative for Lambda Expression.
+		Big Advantage of using Method Reference is Code re-usability.
+		Functional Interface method can be mapped to our specify method using :: operator, this is called Method Reference.
+		Target method can be either static method or instance method.
+		
+		static method Syntax:
+			Class Name::Method Name
+		
+		Instance Method Syntax:
+			Object Reference::Method Name
+			
+		Rule for using Method Reference:
+			Argument must match.
+			Modifier and Return type can be different.
+			e.g. - run() --> m1() 
+		
+		
+		Examples:
+			class Test {
+				public static void m1() {
+					for (int i = 0; i < 10; i++) {
+						System.out.println("Child Thread");
+					}
+				}
+				
+				p s v m (String[] args) {
+					
+					Runnable r = () -> {
+							for (int i = 0; i < 10; i++) {
+								System.out.println("Child Thread");
+							}
+					}
+					// We can Replace this Lamda Expression as below:
+					Runnable r = Test::m1;
+					// :: Method Reference 
+					// Runnable Interface run method is referring to m1() method.
+					
+					Thread t = new Thread(r);
+					t.start();
+					for (int i = 0; i < 10; i++) {
+						System.out.println("Main Thread");
+					}
+				}
+			}
+	
+			interface MyInterface {
+				public void add (int a, int b);
+			}
+			
+			class Test {
+				
+				public static void sum(int x, int y) {
+					System.out.println("Sum : "+ (x + y));
+				}
+				
+				p s v m (String[] args) {
+					MyInterface i = (a,b) -> System.out.println("Sum : "+ (a+b));
+					// Above line can be replaced as below
+					MyInterface i = Test::sum;
+					i.add(10, 20);
+				}
+			}
+			
+	
+	Constructor Reference:
+		
+		Syntaxt:
+			ClassName::new // Costructor Reference
+		
+		When we should go for Construction Reference?
+			When Functional Interface method returns an Object.
+		
+		Rule for using Constructor Reference:
+			Argument must match.
+			
+		Examples:
+			
+			Interface MyInterface {
+				public Sample get();
+			}
+			
+			class Sample {
+				Sample() {
+					// statements
+					System.out.println("Sample Class Constructor");
+				}
+			}
+			
+			class Test {
+				
+				p s v m (String[] args) {
+					MyInterface i = Sample::new;
+					// Here MyInterface get() method refers to Sample class Constructor
+					Sample s = i.get();
+				}
+			}
+			
+			----------------------------------------------------------------------------
+			
+			Interface MyInterface {
+				public Sample get(String s);
+			}
+			
+			class Sample {
+				Sample(String s) {
+					// statements
+					System.out.println("Sample Class Constructor : " + s);
+				}
+			}
+			
+			class Test {
+				
+				p s v m (String[] args) {
+					MyInterface i = Sample::new;
+					// Here MyInterface get() method refers to Sample class Constructor
+					Sample s = i.get("Raj");
+					Sample s1 = i.get("Tomar");
+				}
+			}
+			
+ 
+======================================================================================================================================================
+Very Useful Eclipse Keyboar Shortcuts:
+--------------------------------------
+1. Ctrl + Space
+2. Ctrl + 1
+3. Ctrl + Shift + R (ant T)
+4. F3 (Go To Declaration)
+5. F4 (Type Hierarchy)
+6. Ctrl + Shift + L
+======================================================================================================================================================
+Maven Build Life Cycle:
+--------------------------------------
+	1. Validate
+	2. Compile
+	3. Test
+	4. Package
+	5. Integration Test
+	6. Verify 
+	7. Install 
+	8. Deploy
+
+Important Maven Commands:
+--------------------------------------
+	mvn compile
+	mvn test-compile
+	mvn test
+	mvn help:effective-settings
+	mvn dependency:tree
+	mvn dependency:sources
+	mvn --debug
+======================================================================================================================================================
