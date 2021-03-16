@@ -1,0 +1,49 @@
+From Collections to Streams in Java 8 Using Lambda Expressions
+==============================================================================
+
+1. Lambda Express and Function Interfaces
+
+	Examples:
+		Comparator<String> comparator = Comparator<>(){
+			public int compare(String s1, String s2) {
+				return Integer.compare(s1.length(), s2.length());
+			}
+		}
+		
+		// Convert to Lambda
+		Comparator<String> comparator = (String s1, String s2) -> Integer.compare(s1.length(), s2.length());
+		
+		Using Lambda express we can pass code as Parameter
+		
+		Runnable r = new Runnable() {
+			public void run() {
+				int i = 0;
+				while (i++ < 10) {
+					System.out.println("It works");
+				}
+			}
+		}
+		// Convert to Lambda
+		Runnable r = () -> {
+			int i = 0;
+			while (i++ < 10) {
+				System.out.println("It works");
+			}
+		};
+		
+		Incase there is a returned value:
+			(String s1, String s2) -> {
+				System.out.println("I am comparing Strings");
+				return Integer.compare(s1.length(), s2.length());
+			}
+		
+		Some Remarks:
+			1. One can put modifiers on the parameter of Lambda expression.
+				- Final keyword
+				- Annotations
+			2. It is not possible to specify return type of Lambda expression.
+			3. We can omit the types of parameters
+				(s1, s2) -> {
+				System.out.println("I am comparing Strings");
+				return Integer.compare(s1.length(), s2.length());
+			}
